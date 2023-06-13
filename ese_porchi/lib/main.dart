@@ -1,125 +1,181 @@
+import 'dart:developer' as developer;
+import 'dart:ffi';
+import 'dart:isolate';
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:ese_porchi/home_screen.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+const String countKey = 'count';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+const String isolateName = 'isolate';
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+ReceivePort port = ReceivePort();
+
+SharedPreferences? prefs;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  GeocodingPlatform.instance;
+  AwesomeNotifications().initialize(
+      null,
+      [
+        NotificationChannel(
+            channelGroupKey: 'basic_channel_group',
+            channelKey: 'basic_channel',
+            channelName: 'Basic notifications',
+            channelDescription: 'Notification channel for basic tests',
+            defaultColor: Color(0xFF9D50DD),
+            ledColor: Colors.white)
+      ],
+      channelGroups: [
+        NotificationChannelGroup(
+            channelGroupKey: 'basic_channel_group',
+            channelGroupName: 'Basic group')
+      ],
+      debug: true);
+
+  IsolateNameServer.registerPortWithName(
+    port.sendPort,
+    isolateName,
+  );
+  prefs = await SharedPreferences.getInstance();
+  if (!prefs!.containsKey(countKey)) {
+    await prefs!.setInt(countKey, 0);
   }
+
+  runApp(const EsePorchiMain());
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class EsePorchiMain extends StatefulWidget {
+  const EsePorchiMain({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<EsePorchiMain> createState() => _EsePorchiMainState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+class _EsePorchiMainState extends State<EsePorchiMain> {
+  @override
+  void initState() {
+    super.initState();
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0x9f4376f8),
+      ),
+      home: const _AlarmHomePage(),
+    );
+  }
+}
+
+class _AlarmHomePage extends StatefulWidget {
+  const _AlarmHomePage({Key? key}) : super(key: key);
+
+  @override
+  _AlarmHomePageState createState() => _AlarmHomePageState();
+}
+
+class _AlarmHomePageState extends State<_AlarmHomePage> {
+  int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    AndroidAlarmManager.initialize();
+
+    port.listen((_) async => await _incrementCounter());
+  }
+
+  Future<void> _incrementCounter() async {
+    developer.log('Increment counter!');
+    await prefs?.reload();
+
+    setState(() {
+      _counter++;
+    });
+  }
+
+  static SendPort? uiSendPort;
+
+  @pragma('vm:entry-point')
+  static Future<void> callback() async {
+    developer.log('Alarm fired!');
+    final prefs = await SharedPreferences.getInstance();
+    final currentCount = prefs.getInt(countKey) ?? 0;
+    await prefs.setInt(countKey, currentCount + 1);
+
+    uiSendPort ??= IsolateNameServer.lookupPortByName(isolateName);
+    uiSendPort?.send(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.headlineMedium;
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('Android alarm manager plus example'),
+        elevation: 4,
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Alarm fired $_counter times',
+              style: textStyle,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Total alarms fired: ',
+                  style: textStyle,
+                ),
+                Text(
+                  prefs?.getInt(countKey).toString() ?? '',
+                  key: const ValueKey('BackgroundCountText'),
+                  style: textStyle,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              key: const ValueKey('RegisterOneShotAlarm'),
+              onPressed: () async {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => HomeScreen()));
+                await AndroidAlarmManager.oneShot(
+                  const Duration(seconds: 5),
+                  // Ensure we have a unique alarm ID.
+                  Random().nextInt(pow(2, 31) as int),
+                  callback,
+                  exact: true,
+                  wakeup: true,
+                );
+              },
+              child: const Text(
+                'Schedule OneShot Alarm',
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
