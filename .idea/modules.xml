@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ese_porchi/ese_porchi.iml" filepath="$PROJECT_DIR$/ese_porchi/ese_porchi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ese_porchi/android/ese_porchi_android.iml" filepath="$PROJECT_DIR$/ese_porchi/android/ese_porchi_android.iml" />
+    </modules>
+  </component>
+</project>
