@@ -52,10 +52,11 @@ class _MapsScreenState extends State<MapsScreen> {
 
     destinations.add(newDestination);
 
-    sp.setInt("alarm_count", sp.getInt("alarm_count")! + 1);
-    sp.setString("destinations", jsonEncode(destinations));
+    int alarmCount = sp.getInt("alarm_count") ?? 0;
+    sp.setInt("alarm_count", alarmCount + 1);
 
-    print("Done setting sp ${sp.getString("destinations")}");
+    // Use the alarm_count as the index for the destination list
+    sp.setString("destinations_$alarmCount", jsonEncode(newDestination));
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MainScreen()),

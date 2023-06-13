@@ -159,8 +159,8 @@ class _AlarmHomePageState extends State<_AlarmHomePage> {
             ElevatedButton(
               key: const ValueKey('RegisterOneShotAlarm'),
               onPressed: () async {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const MainScreen()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const MainScreen()));
                 await AndroidAlarmManager.oneShot(
                   const Duration(seconds: 5),
                   // Ensure we have a unique alarm ID.

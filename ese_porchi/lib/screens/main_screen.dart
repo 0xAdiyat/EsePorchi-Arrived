@@ -19,19 +19,15 @@ class _MainScreenState extends State<MainScreen> {
   int loadAlarmCount = 0;
   double currentLatitude = 0.0, currentLongitude = 0.0;
 
-  get navigateToSearchLocationScreen => Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => SearchLocationScreen()));
-
   @override
   void initState() {
     super.initState();
     loadData().then((value) {
       setState(() {});
+      if (loadAlarmCount != 0) {
+        getCurrentLocation();
+      }
     });
-
-    if (loadAlarmCount != 0) {
-      getCurrentLocation();
-    }
   }
 
   void getCurrentLocation() async {
@@ -56,12 +52,22 @@ class _MainScreenState extends State<MainScreen> {
       destinationLatitude,
       destinationLongitude,
     );
+    print("Distance is: $distance  Triggered");
     if (distance <= 20) {
       AwesomeNotifications().createNotification(
         content: NotificationContent(
-          id: 10,
+          id: 35,
           channelKey: "basic_channel",
           title: "Simple_Notification",
+          body: "This is a simple notification",
+        ),
+      );
+    } else {
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 53,
+          channelKey: "basic_channel",
+          title: "Its working",
           body: "This is a simple notification",
         ),
       );
@@ -105,20 +111,19 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> loadData() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     loadAlarmCount = sp.getInt("alarm_count") ?? 0;
-    String destinationsJson = sp.getString("destinations") ?? "[]";
-    loadDestination = (jsonDecode(destinationsJson) as List<dynamic>)
-        .map((dynamic item) => (item as List<dynamic>)
-            .map((dynamic subItem) => subItem.toString())
-            .toList())
-        .toList();
+    loadDestination.clear();
+    for (int i = 1; i <= loadAlarmCount; i++) {
+      String destinationJson = sp.getString("destinations_$i") ?? "[]";
+      List<String> destination = (jsonDecode(destinationJson) as List<dynamic>)
+          .map((dynamic item) => item.toString())
+          .toList();
+      loadDestination.add(destination);
+    }
     print("Stored data $loadAlarmCount and $loadDestination");
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loadAlarmCount != 0) {
-      getCurrentLocation();
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text("EsePorchi - Arrived"),
@@ -126,86 +131,82 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Stack(
         children: [
-          loadAlarmCount == 0
-              ? Center(
+          if (loadAlarmCount == 0)
+            Center(
+              child: Card(
+                elevation: 1,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Container(
+                  height: 200,
+                  width: 190,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add,
+                        size: 50,
+                        color: Colors.greenAccent,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SearchLocationScreen()));
+                        },
+                        child: Text("Add destination"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (loadAlarmCount != 0)
+            ListView.builder(
+              itemCount: loadDestination.length,
+              padding: EdgeInsets.all(16),
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 16),
                   child: Card(
                     elevation: 1,
-                    color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Container(
-                      height: 200,
-                      width: 190,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            size: 50,
-                            color: Colors.greenAccent,
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SearchLocationScreen()));
-                            },
-                            child: Text("Add destination"),
-                          ),
-                        ],
+                    child: ListTile(
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      leading: Icon(Icons.alarm, size: 32, color: Colors.green),
+                      title: Text(
+                        "Alarm ${index + 1}",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      subtitle: Text(
+                        "Alarm details",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_forward,
+                          size: 28, color: Colors.green),
+                      onTap: () {
+                        // Handle alarm selection
+                      },
                     ),
                   ),
-                )
-              : ListView.builder(
-                  itemCount: loadDestination.length,
-                  padding: EdgeInsets.all(16),
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 16),
-                      child: Card(
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                          leading:
-                              Icon(Icons.alarm, size: 32, color: Colors.green),
-                          title: Text(
-                            "Alarm ${index + 1}",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            "Alarm details",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          trailing: Icon(
-                            Icons.arrow_forward,
-                            size: 28,
-                            color: Colors.green,
-                          ),
-                          onTap: () {
-                            // Handle alarm selection
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
+                );
+              },
+            ),
+        ],
+      ),
+      floatingActionButton: loadAlarmCount != 0
+          ? FloatingActionButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => SearchLocationScreen()));
@@ -214,10 +215,8 @@ class _MainScreenState extends State<MainScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-            ),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }
