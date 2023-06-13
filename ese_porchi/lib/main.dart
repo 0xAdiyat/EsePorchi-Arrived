@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:ese_porchi/home_screen.dart';
+import 'package:ese_porchi/screens/main_screen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +78,7 @@ class _EsePorchiMainState extends State<EsePorchiMain> {
       title: 'Flutter Demo',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0x9f4376f8),
+        colorSchemeSeed: Colors.greenAccent,
       ),
       home: const _AlarmHomePage(),
     );
@@ -159,7 +160,7 @@ class _AlarmHomePageState extends State<_AlarmHomePage> {
               key: const ValueKey('RegisterOneShotAlarm'),
               onPressed: () async {
                 Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => HomeScreen()));
+                    MaterialPageRoute(builder: (context) => const MainScreen()));
                 await AndroidAlarmManager.oneShot(
                   const Duration(seconds: 5),
                   // Ensure we have a unique alarm ID.
