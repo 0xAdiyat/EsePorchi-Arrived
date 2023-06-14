@@ -103,7 +103,7 @@ class _MapsScreenState extends State<MapsScreen> {
                 ElevatedButton(
                   onPressed: () =>
                       storeDestinationAndNavigateToMainScreen(selectedLatLng),
-                  child: Text('Save Destination and Go to MainScreen'),
+                  child: Text('Save Destination'),
                 ),
               ],
             );

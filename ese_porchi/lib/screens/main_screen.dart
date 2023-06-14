@@ -59,7 +59,8 @@ class _MainScreenState extends State<MainScreen> {
       destinationLongitude,
     );
     print("Distance is: $distance  Triggered");
-    if (distance <= 2295) {
+    if (distance <= 20) {
+      print("Destinations" + distance.toString());
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           displayOnBackground: true,
@@ -70,16 +71,7 @@ class _MainScreenState extends State<MainScreen> {
           body: "We have reached your destination.",
         ),
       );
-    } /* else {
-      AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: 53,
-          channelKey: "basic_channel",
-          title: "Its working",
-          body: "This is a simple notification",
-        ),
-      );
-    }*/
+    }
   }
 
   num calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -151,28 +143,30 @@ class _MainScreenState extends State<MainScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Container(
-                      height: 200,
-                      width: 190,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            size: 50,
-                            color: Colors.greenAccent,
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          SearchLocationScreen()));
-                            },
-                            child: Text("Add destination"),
-                          ),
-                        ],
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                const SearchLocationScreen()));
+                      },
+                      child: SizedBox(
+                        height: 200,
+                        width: 190,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add,
+                              size: 50,
+                              color: Colors.greenAccent,
+                            ),
+                            Text(
+                              "Add destination",
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

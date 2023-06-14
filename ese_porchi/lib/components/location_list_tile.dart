@@ -21,10 +21,13 @@ class LocationListTile extends StatelessWidget {
           onTap: press,
           horizontalTitleGap: 0,
           leading: SvgPicture.asset("assets/icons/location_pin.svg"),
-          title: Text(
-            location,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 3.0),
+            child: Text(
+              location,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
         const Divider(

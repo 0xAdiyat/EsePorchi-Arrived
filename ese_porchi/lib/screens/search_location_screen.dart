@@ -1,6 +1,6 @@
 import 'package:ese_porchi/screens/maps_screen.dart';
 import 'package:ese_porchi/models/place_auto_complete_response.dart';
-import 'package:ese_porchi/network_utility.dart';
+import 'package:ese_porchi/utilities/network_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../components/location_list_tile.dart';
@@ -63,7 +63,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
           CircleAvatar(
             backgroundColor: secondaryColor10LightTheme,
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
               icon: const Icon(Icons.close, color: Colors.black),
             ),
           ),
@@ -106,7 +108,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                 "assets/icons/location.svg",
                 height: 16,
               ),
-              label: const Text("Use my Current Location"),
+              label: const Text("Use map to set location"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: secondaryColor10LightTheme,
                 foregroundColor: textColorLightTheme,
