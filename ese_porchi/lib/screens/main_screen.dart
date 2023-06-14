@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:ese_porchi/constants.dart';
 import 'package:ese_porchi/screens/search_location_screen.dart';
@@ -24,10 +25,15 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    loadData().then((value) {
+    loadData().then((value) async {
       setState(() {});
-      if (loadAlarmCount != 0) {
-        getCurrentLocation();
+      if (loadDestination.isNotEmpty) {
+        print("loaddestination is not empty");
+        await AndroidAlarmManager.periodic(
+          const Duration(seconds: 5), // Adjust the interval as needed
+          67, // Unique alarm ID
+          () => getCurrentLocation(),
+        );
       }
     });
   }
@@ -124,8 +130,6 @@ class _MainScreenState extends State<MainScreen> {
       loadDestination.add(destination);
     }
 
-    print("Yoyo" + sp.getStringList("destinations_0").toString());
-
     print("Stored data $loadAlarmCount and $loadDestination");
   }
 
@@ -161,9 +165,10 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      SearchLocationScreen()));
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          SearchLocationScreen()));
                             },
                             child: Text("Add destination"),
                           ),
@@ -214,8 +219,14 @@ class _MainScreenState extends State<MainScreen> {
                                 ),
                                 trailing: Icon(Icons.arrow_forward,
                                     size: 28, color: Colors.green),
-                                onTap: () {
-                                  // Handle alarm selection
+                                onTap: () async {
+                                  print("0xAdiyat");
+                                  try {
+                                    await AndroidAlarmManager.oneShot(
+                                        Duration(seconds: 5), 4, myFunc);
+                                  } catch (e) {
+                                    print(e);
+                                  }
                                 },
                               ),
                             ),
@@ -329,5 +340,9 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return 'Unknown location';
+  }
+
+  myFunc() {
+    print("YoyoIss working");
   }
 }
