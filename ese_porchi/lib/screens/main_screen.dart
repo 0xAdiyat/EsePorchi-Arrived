@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     loadData();
-    Timer.periodic(Duration(seconds: 7), (Timer t) {
+    Timer.periodic(Duration(seconds: 10), (Timer t) {
       loadData().then((value) async {
         setState(() {});
         getCurrentLocation();
@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
           id: createUniqueID(),
           channelKey: "basic_channel",
           title: "${Emojis.building_house} Hey! EsePorchi",
-          body: "Hey we have reached your destination",
+          body: "We have reached your destination.",
         ),
       );
     } /* else {
