@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:ese_porchi/search_location_screen.dart';
+import 'package:ese_porchi/constants.dart';
+import 'package:ese_porchi/screens/search_location_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geodesy/geodesy.dart';
+import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -112,13 +114,18 @@ class _MainScreenState extends State<MainScreen> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     loadAlarmCount = sp.getInt("alarm_count") ?? 0;
     loadDestination.clear();
+
     for (int i = 1; i <= loadAlarmCount; i++) {
       String destinationJson = sp.getString("destinations_$i") ?? "[]";
-      List<String> destination = (jsonDecode(destinationJson) as List<dynamic>)
-          .map((dynamic item) => item.toString())
-          .toList();
+      List<dynamic> destinationList =
+          jsonDecode(destinationJson) as List<dynamic>;
+      List<String> destination =
+          destinationList.map((dynamic item) => item.toString()).toList();
       loadDestination.add(destination);
     }
+
+    print("Yoyo" + sp.getStringList("destinations_0").toString());
+
     print("Stored data $loadAlarmCount and $loadDestination");
   }
 
@@ -126,83 +133,168 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 4,
         title: Text("EsePorchi - Arrived"),
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          if (loadAlarmCount == 0)
-            Center(
-              child: Card(
-                elevation: 1,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Container(
-                  height: 200,
-                  width: 190,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 50,
-                        color: Colors.greenAccent,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SearchLocationScreen()));
-                        },
-                        child: Text("Add destination"),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          if (loadAlarmCount != 0)
-            ListView.builder(
-              itemCount: loadDestination.length,
-              padding: EdgeInsets.all(16),
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 16),
+          loadDestination.isEmpty
+              ? Center(
                   child: Card(
-                    elevation: 1,
+                    elevation: 0.5,
+                    color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      leading: Icon(Icons.alarm, size: 32, color: Colors.green),
-                      title: Text(
-                        "Alarm ${index + 1}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    child: Container(
+                      height: 200,
+                      width: 190,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 50,
+                            color: Colors.greenAccent,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      SearchLocationScreen()));
+                            },
+                            child: Text("Add destination"),
+                          ),
+                        ],
                       ),
-                      subtitle: Text(
-                        "Alarm details",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      trailing: Icon(Icons.arrow_forward,
-                          size: 28, color: Colors.green),
-                      onTap: () {
-                        // Handle alarm selection
-                      },
                     ),
                   ),
-                );
-              },
-            ),
+                )
+              : ListView.builder(
+                  itemCount: loadDestination.length,
+                  padding: EdgeInsets.all(16),
+                  itemBuilder: (context, index) {
+                    print(loadDestination);
+                    final latitude = double.parse(loadDestination[index][0]);
+                    final longitude = double.parse(loadDestination[index][1]);
+
+                    return FutureBuilder<String>(
+                      future: reverseGeocode(latitude, longitude),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final location = snapshot.data!;
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: Card(
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 16),
+                                leading: Icon(Icons.alarm,
+                                    size: 32, color: Colors.green),
+                                title: Text(
+                                  "Alarm ${index + 1}",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "Location: $location",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                trailing: Icon(Icons.arrow_forward,
+                                    size: 28, color: Colors.green),
+                                onTap: () {
+                                  // Handle alarm selection
+                                },
+                              ),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: Card(
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 16),
+                                leading: Icon(Icons.alarm,
+                                    size: 32, color: Colors.green),
+                                title: Text(
+                                  "Alarm ${index + 1}",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "Location: Unknown",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                trailing: Icon(Icons.arrow_forward,
+                                    size: 28, color: Colors.green),
+                                onTap: () {
+                                  // Handle alarm selection
+                                },
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: Card(
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 16),
+                                leading: Icon(Icons.alarm,
+                                    size: 32, color: Colors.green),
+                                title: Text(
+                                  "Alarm ${index + 1}",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "Loading location...",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                trailing: Icon(Icons.arrow_forward,
+                                    size: 28, color: Colors.green),
+                                onTap: () {
+                                  // Handle alarm selection
+                                },
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
         ],
       ),
       floatingActionButton: loadAlarmCount != 0
@@ -218,5 +310,24 @@ class _MainScreenState extends State<MainScreen> {
             )
           : null,
     );
+  }
+
+  Future<String> reverseGeocode(double latitude, double longitude) async {
+    const API_KEY = apiKey;
+    final url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$API_KEY';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final results = json['results'] as List<dynamic>;
+      if (results.isNotEmpty) {
+        final firstResult = results.first;
+        final formattedAddress = firstResult['formatted_address'];
+        return formattedAddress;
+      }
+    }
+
+    return 'Unknown location';
   }
 }

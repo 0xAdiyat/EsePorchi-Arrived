@@ -37,13 +37,16 @@ class _MapsScreenState extends State<MapsScreen> {
       LatLng destination) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
 
-    List<List<String>> destinations = sp.getString("destinations") != null
-        ? (jsonDecode(sp.getString("destinations")!) as List<dynamic>)
-            .map((dynamic item) => (item as List<dynamic>)
-                .map((dynamic subItem) => subItem.toString())
-                .toList())
-            .toList()
-        : [];
+    List<List<String>> destinations = [];
+    int alarmCount = sp.getInt("alarm_count") ?? 0;
+
+    for (int i = 1; i <= alarmCount; i++) {
+      String destinationJson = sp.getString("destinations_$i") ?? "[]";
+      List<String> destination = (jsonDecode(destinationJson) as List<dynamic>)
+          .map((dynamic item) => item.toString())
+          .toList();
+      destinations.add(destination);
+    }
 
     List<String> newDestination = [
       destination.latitude.toString(),
@@ -52,11 +55,12 @@ class _MapsScreenState extends State<MapsScreen> {
 
     destinations.add(newDestination);
 
-    int alarmCount = sp.getInt("alarm_count") ?? 0;
     sp.setInt("alarm_count", alarmCount + 1);
 
-    // Use the alarm_count as the index for the destination list
-    sp.setString("destinations_$alarmCount", jsonEncode(newDestination));
+    for (int i = 0; i < destinations.length; i++) {
+      List<String> destination = destinations[i];
+      sp.setString("destinations_${i + 1}", jsonEncode(destination));
+    }
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MainScreen()),

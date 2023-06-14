@@ -1,11 +1,11 @@
-import 'package:ese_porchi/maps_screen.dart';
+import 'package:ese_porchi/screens/maps_screen.dart';
 import 'package:ese_porchi/models/place_auto_complete_response.dart';
 import 'package:ese_porchi/network_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'components/location_list_tile.dart';
-import 'constants.dart';
-import 'models/autocomplete_prediction.dart';
+import '../components/location_list_tile.dart';
+import '../constants.dart';
+import '../models/autocomplete_prediction.dart';
 
 class SearchLocationScreen extends StatefulWidget {
   const SearchLocationScreen({Key? key}) : super(key: key);

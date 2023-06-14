@@ -1,6 +1,6 @@
 import 'package:ese_porchi/main.dart';
-import 'package:ese_porchi/maps_screen.dart';
-import 'package:ese_porchi/search_location_screen.dart';
+import 'package:ese_porchi/screens/maps_screen.dart';
+import 'package:ese_porchi/screens/search_location_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
