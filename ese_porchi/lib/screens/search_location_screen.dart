@@ -4,7 +4,7 @@ import 'package:ese_porchi/network_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../components/location_list_tile.dart';
-import '../constants.dart';
+import '../utilities/constants.dart';
 import '../models/autocomplete_prediction.dart';
 
 class SearchLocationScreen extends StatefulWidget {

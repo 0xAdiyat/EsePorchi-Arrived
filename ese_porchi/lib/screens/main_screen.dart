@@ -3,8 +3,9 @@ import 'dart:convert';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:ese_porchi/constants.dart';
+import 'package:ese_porchi/utilities/constants.dart';
 import 'package:ese_porchi/screens/search_location_screen.dart';
+import 'package:ese_porchi/utilities/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,7 +27,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 2), (Timer t) {
+    loadData();
+    Timer.periodic(Duration(seconds: 7), (Timer t) {
       loadData().then((value) async {
         setState(() {});
         getCurrentLocation();
@@ -57,16 +59,18 @@ class _MainScreenState extends State<MainScreen> {
       destinationLongitude,
     );
     print("Distance is: $distance  Triggered");
-    if (distance <= 20) {
+    if (distance <= 2295) {
       AwesomeNotifications().createNotification(
         content: NotificationContent(
-          id: 35,
+          displayOnBackground: true,
+          displayOnForeground: true,
+          id: createUniqueID(),
           channelKey: "basic_channel",
-          title: "Simple_Notification",
-          body: "This is a simple notification",
+          title: "${Emojis.building_house} Hey! EsePorchi",
+          body: "Hey we have reached your destination",
         ),
       );
-    } else {
+    } /* else {
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 53,
@@ -75,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
           body: "This is a simple notification",
         ),
       );
-    }
+    }*/
   }
 
   num calculateDistance(double lat1, double lng1, double lat2, double lng2) {

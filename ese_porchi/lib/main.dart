@@ -24,17 +24,20 @@ Future<void> main() async {
   await AndroidAlarmManager.initialize();
   final int helloAlarmID = 7;
   await AndroidAlarmManager.periodic(
-      const Duration(seconds: 3), helloAlarmID, printHello);
+      const Duration(seconds: 1), helloAlarmID, printHello);
   GeocodingPlatform.instance;
   AwesomeNotifications().initialize(
       null,
       [
         NotificationChannel(
+            // playSound: true,
+            soundSource: "resource://raw/alarm_notification",
             channelGroupKey: 'basic_channel_group',
             channelKey: 'basic_channel',
             channelName: 'Basic notifications',
             channelDescription: 'Notification channel for basic tests',
-            defaultColor: Color(0xFF9D50DD),
+            defaultColor: Colors.green,
+            importance: NotificationImportance.Max,
             ledColor: Colors.white)
       ],
       channelGroups: [
