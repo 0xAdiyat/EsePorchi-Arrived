@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
@@ -25,16 +26,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    loadData().then((value) async {
-      setState(() {});
-      if (loadDestination.isNotEmpty) {
-        print("loaddestination is not empty");
-        await AndroidAlarmManager.periodic(
-          const Duration(seconds: 5), // Adjust the interval as needed
-          67, // Unique alarm ID
-          () => getCurrentLocation(),
-        );
-      }
+    Timer.periodic(Duration(seconds: 2), (Timer t) {
+      loadData().then((value) async {
+        setState(() {});
+        getCurrentLocation();
+      });
     });
   }
 
@@ -221,12 +217,6 @@ class _MainScreenState extends State<MainScreen> {
                                     size: 28, color: Colors.green),
                                 onTap: () async {
                                   print("0xAdiyat");
-                                  try {
-                                    await AndroidAlarmManager.oneShot(
-                                        Duration(seconds: 5), 4, myFunc);
-                                  } catch (e) {
-                                    print(e);
-                                  }
                                 },
                               ),
                             ),
@@ -340,9 +330,5 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return 'Unknown location';
-  }
-
-  myFunc() {
-    print("YoyoIss working");
   }
 }
