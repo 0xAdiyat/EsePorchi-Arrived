@@ -1,25 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:ese_porchi/utilities/constants.dart';
 import 'package:ese_porchi/screens/search_location_screen.dart';
 import 'package:ese_porchi/utilities/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:maps_toolkit/maps_toolkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:geodesy/geodesy.dart';
 import 'package:http/http.dart' as http;
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   List<List<String>> loadDestination = [];
   int loadAlarmCount = 0;
   double currentLatitude = 0.0, currentLongitude = 0.0;
@@ -58,9 +58,9 @@ class _MainScreenState extends State<MainScreen> {
       destinationLatitude,
       destinationLongitude,
     );
-    print("Distance is: $distance  Triggered");
+    debugPrint("Distance is: $distance  Triggered");
     if (distance <= 20) {
-      print("Destinations" + distance.toString());
+      print("Destinations$distance");
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           displayOnBackground: true,
@@ -74,12 +74,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  num calculateDistance(double lat1, double lng1, double lat2, double lng2) {
-    final Geodesy geodesy = Geodesy();
-
-    LatLng p1 = LatLng(lat1, lng1);
-    LatLng p2 = LatLng(lat2, lng2);
-    num distance = geodesy.distanceBetweenTwoGeoPoints(p1, p2);
+  double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+    final distance = Geolocator.distanceBetween(lat1, lng1, lat2, lng2);
     return distance;
   }
 
@@ -130,7 +126,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 4,
-        title: Text("EsePorchi - Arrived"),
+        title: const Text("EsePorchi - Arrived"),
         centerTitle: true,
       ),
       body: Stack(
@@ -149,7 +145,7 @@ class _MainScreenState extends State<MainScreen> {
                             builder: (context) =>
                                 const SearchLocationScreen()));
                       },
-                      child: SizedBox(
+                      child: const SizedBox(
                         height: 200,
                         width: 190,
                         child: Column(
@@ -193,13 +189,13 @@ class _MainScreenState extends State<MainScreen> {
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 12, horizontal: 16),
                                 leading: Icon(Icons.alarm,
                                     size: 32, color: Colors.green),
                                 title: Text(
                                   "Alarm ${index + 1}",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -228,13 +224,13 @@ class _MainScreenState extends State<MainScreen> {
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 12, horizontal: 16),
-                                leading: Icon(Icons.alarm,
+                                leading: const Icon(Icons.alarm,
                                     size: 32, color: Colors.green),
                                 title: Text(
                                   "Alarm ${index + 1}",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -246,7 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                                trailing: Icon(Icons.arrow_forward,
+                                trailing: const Icon(Icons.arrow_forward,
                                     size: 28, color: Colors.green),
                                 onTap: () {
                                   // Handle alarm selection
@@ -256,16 +252,16 @@ class _MainScreenState extends State<MainScreen> {
                           );
                         } else {
                           return Padding(
-                            padding: EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.only(bottom: 16),
                             child: Card(
                               elevation: 1,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 12, horizontal: 16),
-                                leading: Icon(Icons.alarm,
+                                leading: const Icon(Icons.alarm,
                                     size: 32, color: Colors.green),
                                 title: Text(
                                   "Alarm ${index + 1}",

@@ -24,7 +24,8 @@ dependencies:
   http: ^1.0.0
   geocoding: ^2.1.0
   geolocator: ^9.0.2
-  geodesy: ^0.4.2
+  maps_toolkit: ^2.0.1
+#  geodesy: ^0.4.2
 
 dev_dependencies:
   flutter_test:

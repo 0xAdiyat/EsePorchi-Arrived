@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ese_porchi/screens/main_screen.dart';
+import 'package:ese_porchi/screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -63,7 +63,7 @@ class _MapsScreenState extends State<MapsScreen> {
     }
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => MainScreen()),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -74,7 +74,7 @@ class _MapsScreenState extends State<MapsScreen> {
         future: searchLocation(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CupertinoActivityIndicator(
                 color: Colors.greenAccent,
               ),
@@ -84,26 +84,37 @@ class _MapsScreenState extends State<MapsScreen> {
           } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final selectedLatLng = LatLng(
                 snapshot.data!.first.latitude, snapshot.data!.first.longitude);
-            return Column(
+            return Stack(
               children: [
-                Expanded(
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: selectedLatLng,
-                      zoom: 14,
-                    ),
-                    markers: {
-                      Marker(
-                        markerId: MarkerId('destination'),
-                        position: selectedLatLng,
-                      ),
-                    },
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: selectedLatLng,
+                    zoom: 14,
                   ),
+                  markers: {
+                    Marker(
+                      markerId: MarkerId('destination'),
+                      position: selectedLatLng,
+                    ),
+                  },
                 ),
-                ElevatedButton(
-                  onPressed: () =>
-                      storeDestinationAndNavigateToMainScreen(selectedLatLng),
-                  child: Text('Save Destination'),
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        storeDestinationAndNavigateToMainScreen(selectedLatLng),
+                    child: Text('Save Destination'),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.greenAccent,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
                 ),
               ],
             );

@@ -176,14 +176,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  geodesy:
-    dependency: "direct main"
-    description:
-      name: geodesy
-      sha256: f1fce7dda4b5c1533ac6fae33636cc7c90749bdc87190fff93fd1ca5a458e3d2
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.2"
   geolocator:
     dependency: "direct main"
     description:
@@ -328,14 +320,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
-  latlong2:
-    dependency: transitive
-    description:
-      name: latlong2
-      sha256: "18712164760cee655bc790122b0fd8f3d5b3c36da2cb7bf94b68a197fbb0811b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.0"
   lints:
     dependency: transitive
     description:
@@ -344,6 +328,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  maps_toolkit:
+    dependency: "direct main"
+    description:
+      name: maps_toolkit
+      sha256: "7771cd4d1afb1849be0c7d546b4e38330efc8573c7ee6c41d5e1ab62458c5b3d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   matcher:
     dependency: transitive
     description:
