@@ -100,9 +100,7 @@ Here is the basic project structure of the app:
 
 ## Dependencies
 
-- `android
-
-_alarm_manager`: ^2.0.0: Used for scheduling alarms on Android devices.
+- `android_alarm_manager`: ^2.0.0: Used for scheduling alarms on Android devices.
 - `flutter_local_notifications`: ^3.1.1: Used for displaying local notifications.
 - `google_maps_flutter`: ^2.1.0: Used for displaying maps and calculating distances.
 - `shared_preferences`: ^2.0.8: Used for persisting alarm data.
