@@ -1,6 +1,6 @@
 # EsePorchi - Arrived
 
-
+<img width="100%" src="https://raw.githubusercontent.com/0xAdiyat/0xAdiyat/main/assets/ese-porchi-arrived-demo-thumbnail.png" alt="EsePorchi-Arrived Cover" />
 
 https://github.com/0xAdiyat/EsePorchi-Arrived/assets/67780459/034a8b3b-7db6-447d-86ad-c2254c85cf8d
 
